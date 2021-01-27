@@ -1,61 +1,232 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
+# Bjornstad
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Derived from the norse word for 'son of', and spawned from my previous framework 'Hoegr' (taken from the norse word for 'conenient'), Bjornstad is a simplistic MVC framework built into it's own dockerized project container for ease-of-use. 
 
-## About Laravel
+Bjornstad is a learning framework, utilising an advanced routing engine that uses regex to route requests between controllers. Bjornstad is intended to be used to teach the concepts of MVC by providing a bare-bones example on how modern frameworks are constructed.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Dependencies
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- Docker 
+- vlucas/Dotenv
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Framework Documentation
 
-## Learning Laravel
+### Routes
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### Helper Functions
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+#### Dump and Die
 
-## Laravel Sponsors
+As a quality-of-life feature Bjornstad contains a dump and die method. This can be used anywhere as it is included by the bootstrap.php.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+<pre>
+    $arr = [1, 2, 3, 4];
 
-### Premium Partners
+    dd($arr);
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[OP.GG](https://op.gg)**
+     Output: 
+        array (size=4)
+            0 => int 1
+            1 => int 2
+            2 => int 3
+            3 => int 4
+</pre>
 
-## Contributing
+<br> 
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+---
 
-## Code of Conduct
+# Development Notes
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+This is a detailed description of the steps taken in developing this framework. This is not only to promote total transparency, but to allow you to learn from this framework as it is intended to be used as a teaching/learning tool. Please note that this framework is not battle-tested and therefore not appropriate for a production environment. 
+## Front Controller
 
-## Security Vulnerabilities
+Nginx is set up to forward all traffic through to a single entry point. In this case we are routing all traffic from the browser through <code>public/index.php</code> This traffic includes parameters which are passed in through the URI as query strings. These requests are passed from the Front Controller to the router. 
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Router
 
-## License
+## Overview
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+The responsibiltiy of the router is to get the <code>Controller</code> and the <code>Action</code>. The only thing the router should care about is whether or not it can find match for the provided URI in the routing table, to delegate work to the controller and method requested.
+
+## Introduction
+
+The router routes requests recieved from the Front Controller to the corresponding controller and action. An action is the method which is called within the controller. This is achieved by a relatively 'smart' routing table. The routing table is a basic array holding key value pairs. The stored items in this array include the <code>route</code> itself, the <code>controller</code> to call, and the <code>action</code>. If we take a look inside our routes array after adding a few routes to it we get a picture of how our routing table is being stored:
+
+<code>
+    <pre>
+        array (size=3)
+        '' => 
+            array (size=2)
+            'controller' => string 'HomeController' (length=14)
+            'action' => string 'index' (length=5)
+        'posts' => 
+            array (size=2)
+            'contorller' => string 'PostController' (length=14)
+            'action' => string 'index' (length=5)
+        'posts/new' => 
+            array (size=2)
+            'controller' => string 'Posts' (length=5)
+            'action' => string 'new' (length=3)
+    </pre>
+</code>
+
+The first key is our route e.g. <code>'posts'</code> which has a value of an array, containing two key-value pairs: our <code>controller</code> and our <code>method</code>. The visual below shows a design table for a basic routing table.
+
+        | Route       | Controller  | Action      |
+        | ----------- | ----------- | ----------- | 
+        | "/"         | Home        | index       |
+        | "/posts"    | Posts       | index       |
+
+The route is passed in from the URl, the router then looks up the route in this routing table (array), if there is a match, the router must then look up the corresponding controller and action. The only responsibility of the router is to get the <code>Controller</code> and <code>Action</code> requested.
+
+### Route Matching
+
+The router match method takes a URL from the query string. This then iterates over the key-value pair array (associative array) of the routing table to find a matching route. If ther eis a route which matches, the parameters for that route are set to be the parameters passed in the query string and true is returned to indicate a match has been found, otherwise we simply return false. In the Front Controller the <code>$_SERVER</code> is accessed for the <code>REQUEST_URI</code>. 
+
+We can check the matching by declaring a few routes and echoing out our parameters in the browser:
+
+<pre>
+        $router = new Router;
+
+        $router->add('/', ['controller' => 'HomeController', 'action' => 'index']);
+        $router->add('/posts', ['contorller' => 'PostController', 'action' => 'index']);
+        $router->add('/posts/new', ['controller' => 'Posts', 'action' => 'new']);
+
+        $url = $_SERVER['REQUEST_URI'];
+
+        if ($router->match($url)) {
+            dd($router->getParams());
+        } else {
+            echo "No route found for URL '$url'";
+        }
+</pre>
+
+### Advanced Route Matching
+
+Simple string routing is not efficient. Matching a simple string can lead to duplications and a much larger routing table than necessary. Instead, we can use pattern matching, as routes follow a similar pattern. We have our controller, a '/' and our action. If we can get this pattern from the URL then we can pattern-match to determine whether or not the controller and action exists within our routing table. We can do this through the use of Regular Expressions.
+
+<br> 
+
+#### Regex
+
+Regular expressions are expressions used for advanced string matching/extracting. Regex can be used to create intricate rules in which characters can be compared and extracted to an exact pattern. This pattern matching enables complex behaviours such as extracting controller/method names from our routes.
+
+##### Character Matching
+
+Regex patterns are written between two "/".
+
+###### Match Strings
+
+- /abc/ - Matches abc in any string
+
+- ^abc$ - Matches whole string "abc" only
+
+- a+ - Match one or more "a"
+
+- /abc/i - Match abc case insensitive
+
+##### Symbols
+
+- ^ - Match start of string
+
+- $ - Match end of string
+
+- \* - Match zero or more
+
+- \+ \- Match one or more
+
+- \. - Match any single character: letter, number or whitespace
+
+- \ - Escape character
+
+##### Modifiers
+
+- i - Makes case insensitive
+
+##### Character Sets
+
+Character sets are denoted with "[]" this will match one
+of any characters within the brackets e.g.[abc] matches a, b, or c nothing else.
+
+Hyphens can be used to specify a character range e.g. [1-5].
+
+We cancombine this with the repetition operators:
+
+- /[a-z0-9 ]+/ - matches any sequence of alphaneumeric
+characters and spaces at least one character in length.
+
+#### Meta Characters
+
+Used to match a specific type of character/
+
+- \d - Matches any digit 0 to 9
+
+- \w - Matches any character from a to z, A to Z and 0 to 9
+
+- \s - Matches any whitespace character
+
+#### Functoins
+
+- preg_match($regex, $string, $matches) - matches string to regex
+
+- preg_replace($regex, $replacement, $string) - replace matching string
+
+#### Capture Groups
+
+Capture Groups can be passed to regex functions which allow for it (such as preg_match). Any subpattern in parentheses will be captured as a group.
+
+Names capture groups can be used (?<name>regex) to retrieve items by name from the capture group array.
+
+Capture groups can be referred to using backreferences (\1,\2 etc...)
+
+### Examples
+
+
+#### Capture Group Backreference
+<br>
+
+<pre>
+    $regex = '/ab(c)/';
+
+    $replacement = '\lde';
+
+    $string = abc;
+
+    preg_replace($regex, $replacement, $string);
+
+    result: cde
+</pre>
+
+#### Named Capture Groups
+<br>
+
+<pre>
+    /(?<month>[a-zA-Z]+) (?<year>\d+)/
+</pre>
+
+#### Replace With Capture Groups
+
+<pre>
+    $regex =  '/(\w+) and (\w+)/';
+
+    $replacement = '\1 or \2';
+
+    $string = 'Bill and Ben';
+
+    result: Bill or Ben
+</pre>
+
+
+___
+
+# Resources
+
+- Regex
+    - https://www.phpliveregex.com/
+
+- Packagist
+    - https://packagist.org/
+
+- PHP 
+    - https://www.php.net/docs.php
